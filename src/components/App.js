@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 
 import Filters from "./Filters";
 import PetBrowser from "./PetBrowser";
@@ -7,6 +7,33 @@ function App() {
   const [pets, setPets] = useState([]);
   const [filters, setFilters] = useState({ type: "all" });
 
+  useEffect(() => {
+    onFindPetsClick();
+  },[]);
+
+  const onChangeType = (e) =>  { 
+    setFilters({ type: e.target.value})
+  }
+  function onFindPetsClick() {
+    let querystring = ""
+    if(filters.type !== "all") {
+    querystring = "?type=" + filters.type} 
+      fetch(`http://localhost:3001/pets${querystring}`)
+      .then(resp => resp.json())
+      .then(data => setPets(data))
+  }
+  const onAdoptPet = (id) => {
+    const newAdoptPet = pets.map(pet=> {
+      if(pet.id === id) {
+        pet.isAdopted = true
+      }
+      return pet
+    })
+    
+    setPets(newAdoptPet)
+    //console.log("onAdoptPet")
+  }
+  
   return (
     <div className="ui container">
       <header>
@@ -15,10 +42,10 @@ function App() {
       <div className="ui container">
         <div className="ui grid">
           <div className="four wide column">
-            <Filters />
+            <Filters onChangeType = {onChangeType} onFindPetsClick = {onFindPetsClick}/>
           </div>
           <div className="twelve wide column">
-            <PetBrowser />
+            <PetBrowser pets = {pets} onAdoptPet = {onAdoptPet}/>
           </div>
         </div>
       </div>
